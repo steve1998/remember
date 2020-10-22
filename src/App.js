@@ -7,6 +7,8 @@ import { options } from './constants/options';
 import 'react-dropdown/style.css';
 import './App.css';
 
+const defaultOptions = options[0];
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -62,8 +64,15 @@ class App extends Component {
     }
   }
 
-  handleSave() {
-    const object = saveToStorage(this.state.isAddType, this.state.isAddLink);
+  async handleSave() {
+    let object = {};
+
+    if (this.state.isAddType === '') {
+      object = await saveToStorage(defaultOptions, this.state.isAddLink);
+    } else {
+      object = await saveToStorage(this.state.isAddType, this.state.isAddLink);
+    }
+
     if (object !== null) {
       this.setState({
         ...this.state,
@@ -112,12 +121,8 @@ class App extends Component {
         </div>
         {
           this.state.isAdd ? (
-            <div className="d-flex flex-row justify-content-between py-4">
-              <div className="mr-4">
-                <Dropdown placeholder="Platform" onChange={value => this.handleIsAddType(value)} options={options}/>
-                {/* <Select placeholder="Platform" options={options} onChange={(values) => {this.handleIsAddType(values)}} />  */}
-              </div>
-              {/* <input onChange={event => this.handleIsAddType(event)} className="form-control rounded-0 mr-4" placeholder="Platform"></input> */}
+            <div className="form-group justify-content-between d-flex flex-row py-4">
+              <Dropdown className="mr-4" placeholder="Platform" value={defaultOptions} onChange={value => this.handleIsAddType(value)} options={options}/>
               <input onChange={event => this.handleIsAddLink(event)} className="form-control rounded-0 mr-4" placeholder="Link"></input>
               <button onClick={this.handleSave} className="btn btn-outline-primary rounded-0">Save</button>
             </div>

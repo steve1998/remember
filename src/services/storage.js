@@ -1,4 +1,4 @@
-export const saveToStorage = (type, link) => {
+export const saveToStorage = async (type, link) => {
     const object = {
         type: type, 
         link: link
