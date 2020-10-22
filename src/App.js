@@ -46,7 +46,7 @@ class App extends Component {
   handleIsAddLink(event) {
     this.setState({
       ...this.state,
-      isAddLink: linkBuilder(event.currentTarget.value.toLowerCase())
+      isAddLink: event.currentTarget.value.toLowerCase()
     })
   }
 
@@ -66,11 +66,12 @@ class App extends Component {
 
   async handleSave() {
     let object = {};
+    const link = linkBuilder(this.state.isAddLink);
 
     if (this.state.isAddType === '') {
-      object = await saveToStorage(defaultOptions, this.state.isAddLink);
+      object = await saveToStorage(defaultOptions, link);
     } else {
-      object = await saveToStorage(this.state.isAddType, this.state.isAddLink);
+      object = await saveToStorage(this.state.isAddType, link);
     }
 
     if (object !== null) {
@@ -78,7 +79,6 @@ class App extends Component {
         ...this.state,
         links: object
       })
-      console.log(this.state.links);
     }
     this.setState({
       ...this.state,
@@ -123,14 +123,13 @@ class App extends Component {
           this.state.isAdd ? (
             <div className="form-group justify-content-between d-flex flex-row py-4">
               <Dropdown className="mr-4" placeholder="Platform" value={defaultOptions} onChange={value => this.handleIsAddType(value)} options={options}/>
-              <input onChange={event => this.handleIsAddLink(event)} className="form-control rounded-0 mr-4" placeholder="Link"></input>
+              <input required onChange={event => this.handleIsAddLink(event)} className="form-control rounded-0 mr-4" placeholder="Link"></input>
               <button onClick={this.handleSave} className="btn btn-outline-primary rounded-0">Save</button>
             </div>
           ) : null
         }
         {
           this.state.links !== null && this.state.links.length > 0 ? (
-            console.log(this.state.links[0]),
             this.state.links.map((link, index) => {
               return <Links key={index} type={link.type} link={link.link} />
             })

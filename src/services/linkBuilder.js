@@ -1,5 +1,6 @@
 export const linkBuilder = (link) => {
-    if (link.slice(0, 8) === '') {
+    if (link === '') {
+        console.log('yes')
         return 'https://google.com';
     }
 
