@@ -1,25 +1,136 @@
-/*global chrome*/
-
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import Dropdown from 'react-dropdown';
+import Links from './components/links/Links';
+import { getFromStorage, saveToStorage } from './services/storage';
+import { linkBuilder } from './services/linkBuilder';
+import { options } from './constants/options';
+import 'react-dropdown/style.css';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      links: [],
+      isAdd: false,
+      isAddType: '',
+      isAddLink: '',
+      isToggle: false
+    }
+
+    this.handleIsAddType = this.handleIsAddType.bind(this);
+    this.handleIsAddLink = this.handleIsAddLink.bind(this);
+    this.handleAdd = this.handleAdd.bind(this);
+    this.handleSave = this.handleSave.bind(this);
+    this.handleClear = this.handleClear.bind(this);
+    this.handleIsToggle = this.handleIsToggle.bind(this);
+  }
+
+  componentDidMount() {
+    const array = getFromStorage();
+    this.setState({
+      ...this.state,
+      links: array
+    });
+  }
+
+  handleIsAddType(platform) {
+    this.setState({
+      ...this.state, 
+      isAddType: platform.value
+    })
+  }
+
+  handleIsAddLink(event) {
+    this.setState({
+      ...this.state,
+      isAddLink: linkBuilder(event.currentTarget.value.toLowerCase())
+    })
+  }
+
+  handleAdd() {
+    if (this.state.isAdd) {
+      this.setState({
+        ...this.state,
+        isAdd: false
+      })
+    } else {
+      this.setState({
+        ...this.state,
+        isAdd: true
+      })
+    }
+  }
+
+  handleSave() {
+    const object = saveToStorage(this.state.isAddType, this.state.isAddLink);
+    if (object !== null) {
+      this.setState({
+        ...this.state,
+        links: object
+      })
+      console.log(this.state.links);
+    }
+    this.setState({
+      ...this.state,
+      isAdd: false
+    })
+  }
+
+  handleClear() {
+    localStorage.removeItem('links');
+    this.setState({
+      ...this.state,
+      links: []
+    })
+  }
+
+  handleIsToggle() {
+    if (this.state.isToggle) {
+      this.setState({
+        ...this.state,
+        isToggle: false
+      })
+    } else {
+      this.setState({
+        ...this.state,
+        isToggle: true
+      })
+    }
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          {this.props.isExt ? 
-            <img src={chrome.runtime.getURL("static/media/logo.svg")} className="App-logo" alt="logo" />
-          :
-            <img src={logo} className="App-logo" alt="logo" />
-          }
-
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+      <div className="container p-4">
+        <div className="d-flex flex-column justify-content-center">
+          <span className="d-flex flex-row justify-content-center heading">Remember</span>
+          <span className="d-flex flex-row justify-content-center subheading mb-4">Add important links using this extension</span>
+          <div className="d-flex flex-row justify-content-center">
+            <button className="btn btn-outline-primary mr-2 rounded-0" onClick={this.handleAdd}>Add</button>
+            <button className="btn btn-outline-danger rounded-0" onClick={this.handleClear}>Clear</button>
+          </div>
+        </div>
+        {
+          this.state.isAdd ? (
+            <div className="d-flex flex-row justify-content-between py-4">
+              <div className="mr-4">
+                <Dropdown placeholder="Platform" onChange={value => this.handleIsAddType(value)} options={options}/>
+                {/* <Select placeholder="Platform" options={options} onChange={(values) => {this.handleIsAddType(values)}} />  */}
+              </div>
+              {/* <input onChange={event => this.handleIsAddType(event)} className="form-control rounded-0 mr-4" placeholder="Platform"></input> */}
+              <input onChange={event => this.handleIsAddLink(event)} className="form-control rounded-0 mr-4" placeholder="Link"></input>
+              <button onClick={this.handleSave} className="btn btn-outline-primary rounded-0">Save</button>
+            </div>
+          ) : null
+        }
+        {
+          this.state.links !== null && this.state.links.length > 0 ? (
+            console.log(this.state.links[0]),
+            this.state.links.map((link, index) => {
+              return <Links key={index} type={link.type} link={link.link} />
+            })
+          ) : null
+        } 
       </div>
     );
   }
